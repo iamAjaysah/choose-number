@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Attitude Wallpaper Experience</title>
+  <style>
+    :root {
+      --primary-glow: #ff0055;
+      --bg-gradient: linear-gradient(135deg, #0f0c20 0%, #150a21 50%, #060208 100%);
+      --text-color: #ffffff;
+      --accent-glow: rgba(255, 0, 85, 0.4);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #08070c;
+      color: var(--text-color);
+      overflow-x: hidden;
+      padding: 20px;
+    }
+
+    /* Controls Header */
+    .controls-container {
+      margin-bottom: 25px;
+      text-align: center;
+      z-index: 10;
+    }
+
+    .controls-container h2 {
+      font-size: 1.2rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #a0a0ba;
+      margin-bottom: 12px;
+    }
+
+    .number-selector {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .num-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .num-btn:hover {
+      transform: translateY(-3px);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .num-btn.active {
+      background: var(--primary-glow);
+      border-color: var(--primary-glow);
+      box-shadow: 0 0 20px var(--accent-glow);
+      transform: scale(1.1);
+    }
+
+    /* Wallpaper Canvas Wrapper */
+    .wallpaper-frame {
+      position: relative;
+      width: 360px;
+      height: 640px;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px var(--accent-glow);
+      transition: all 0.5s ease;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .wallpaper-content {
+      width: 100%;
+      height: 100%;
+      background: var(--bg-gradient);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px 30px;
+      position: relative;
+      transition: background 0.6s ease;
+    }
+
+    /* Background Ambient Lights */
+    .glow-orb {
+      position: absolute;
+      width: 250px;
+      height: 250px;
+      background: var(--primary-glow);
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: 0.35;
+      top: -50px;
+      right: -50px;
+      transition: all 0.6s ease;
+    }
+
+    .glow-orb-2 {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      background: var(--primary-glow);
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.2;
+      bottom: -40px;
+      left: -40px;
+      transition: all 0.6s ease;
+    }
+
+    /* Wallpaper Text / Graphics */
+    .top-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.8rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+
+    .big-number {
+      font-size: 7rem;
+      font-weight: 900;
+      line-height: 1;
+      background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.1) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      user-select: none;
+      margin: 10px 0;
+    }
+
+    .quote-box {
+      z-index: 2;
+    }
+
+    .attitude-quote {
+      font-size: 1.8rem;
+      font-weight: 800;
+      line-height: 1.25;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      text-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .sub-text {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.6);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .footer-tag {
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      opacity: 0.4;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Controls -->
+  <div class="controls-container">
+    <h2>Select Attitude Level</h2>
+    <div class="number-selector">
+      <button class="num-btn active" onclick="setWallpaper(1)">01</button>
+      <button class="num-btn" onclick="setWallpaper(2)">02</button>
+      <button class="num-btn" onclick="setWallpaper(3)">03</button>
+      <button class="num-btn" onclick="setWallpaper(4)">04</button>
+      <button class="num-btn" onclick="setWallpaper(5)">05</button>
+    </div>
+  </div>
+
+  <!-- Wallpaper Frame -->
+  <div class="wallpaper-frame" id="frame">
+    <div class="wallpaper-content" id="wallpaper">
+      <div class="glow-orb" id="orb1"></div>
+      <div class="glow-orb-2" id="orb2"></div>
+
+      <div class="top-badge">
+        <span>//</span>
+        <span id="category">RULES OF GAME</span>
+      </div>
+
+      <div class="quote-box">
+        <div class="big-number" id="numDisplay">01</div>
+        <div class="attitude-quote" id="quote">SILENCE IS THE LOUDEST VOICE.</div>
+        <div class="sub-text" id="subtext">LET SUCCESS MAKE THE NOISE</div>
+      </div>
+
+      <div class="footer-tag">
+        ATTITUDE // 2026 EDITION
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const themes = {
+      1: {
+        glow: "#ff0055",
+        accentGlow: "rgba(255, 0, 85, 0.4)",
+        gradient: "linear-gradient(135deg, #0f0c20 0%, #150a21 50%, #060208 100%)",
+        category: "RULE #01",
+        number: "01",
+        quote: "SILENCE IS THE LOUDEST VOICE.",
+        subtext: "LET SUCCESS MAKE THE NOISE."
+      },
+      2: {
+        glow: "#00f0ff",
+        accentGlow: "rgba(0, 240, 255, 0.4)",
+        gradient: "linear-gradient(135deg, #031322 0%, #022030 50%, #010810 100%)",
+        category: "MINDSET",
+        number: "02",
+        quote: "I DON'T COMPETE, I OVERTAKE.",
+        subtext: "BUILT DIFFERENT FROM DAY ONE."
+      },
+      3: {
+        glow: "#ffb700",
+        accentGlow: "rgba(255, 183, 0, 0.4)",
+        gradient: "linear-gradient(135deg, #1c1503 0%, #291e02 50%, #0a0701 100%)",
+        category: "KING MODE",
+        number: "03",
+        quote: "NOT EVERYONE DESERVES ACCESS.",
+        subtext: "PRIVILEGE, NOT AN OPTION."
+      },
+      4: {
+        glow: "#a000ff",
+        accentGlow: "rgba(160, 0, 255, 0.4)",
+        gradient: "linear-gradient(135deg, #120322 0%, #1b0233 50%, #07000d 100%)",
+        category: "FOCUS",
+        number: "04",
+        quote: "WORK IN DARKNESS, SHINE IN LIGHT.",
+        subtext: "RESULTS WILL SPEAK FOR YOU."
+      },
+      5: {
+        glow: "#00ff66",
+        accentGlow: "rgba(0, 255, 102, 0.4)",
+        gradient: "linear-gradient(135deg, #021a0d 0%, #022813 50%, #000a04 100%)",
+        category: "UNSTOPPABLE",
+        number: "05",
+        quote: "PROVE THEM WRONG EVERY SINGLE DAY.",
+        subtext: "NO EXCUSES, JUST EXECUTION."
+      }
+    };
+
+    function setWallpaper(num) {
+      const data = themes[num];
+      const root = document.documentElement;
+
+      // Update active button
+      document.querySelectorAll('.num-btn').forEach((btn, idx) => {
+        btn.classList.toggle('active', idx + 1 === num);
+      });
+
+      // Update CSS Variables for Smooth Glow Effects
+      root.style.setProperty('--primary-glow', data.glow);
+      root.style.setProperty('--accent-glow', data.accentGlow);
+
+      // Update Content
+      document.getElementById('wallpaper').style.background = data.gradient;
+      document.getElementById('category').innerText = data.category;
+      document.getElementById('numDisplay').innerText = data.number;
+      document.getElementById('quote').innerText = data.quote;
+      document.getElementById('subtext').innerText = data.subtext;
+    }
+  </script>
+</body>
+</html>
