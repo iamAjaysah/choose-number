@@ -3,20 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Attitude Wallpaper Experience</title>
+  <title>Attitude Wallpaper Engine</title>
+  
+  <!-- html2canvas for downloading the wallpaper as image -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
   <style>
     :root {
       --primary-glow: #ff0055;
-      --bg-gradient: linear-gradient(135deg, #0f0c20 0%, #150a21 50%, #060208 100%);
-      --text-color: #ffffff;
-      --accent-glow: rgba(255, 0, 85, 0.4);
+      --secondary-glow: #7900ff;
+      --bg-gradient: radial-gradient(circle at top right, #1a0022, #080010, #030005);
+      --accent-glow: rgba(255, 0, 85, 0.5);
+      --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: var(--font-family);
+      user-select: none;
     }
 
     body {
@@ -25,268 +31,396 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: #08070c;
-      color: var(--text-color);
+      background-color: #040207;
+      color: #ffffff;
+      padding: 20px 10px;
       overflow-x: hidden;
-      padding: 20px;
     }
 
-    /* Controls Header */
-    .controls-container {
-      margin-bottom: 25px;
-      text-align: center;
-      z-index: 10;
-    }
-
-    .controls-container h2 {
-      font-size: 1.2rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: #a0a0ba;
-      margin-bottom: 12px;
-    }
-
-    .number-selector {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .num-btn {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      background: rgba(255, 255, 255, 0.05);
-      color: #fff;
-      font-size: 1.2rem;
-      font-weight: 700;
-      cursor: pointer;
-      backdrop-filter: blur(10px);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .num-btn:hover {
-      transform: translateY(-3px);
-      border-color: rgba(255, 255, 255, 0.4);
-    }
-
-    .num-btn.active {
-      background: var(--primary-glow);
-      border-color: var(--primary-glow);
-      box-shadow: 0 0 20px var(--accent-glow);
-      transform: scale(1.1);
-    }
-
-    /* Wallpaper Canvas Wrapper */
-    .wallpaper-frame {
-      position: relative;
-      width: 360px;
-      height: 640px;
-      border-radius: 28px;
-      overflow: hidden;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px var(--accent-glow);
-      transition: all 0.5s ease;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .wallpaper-content {
-      width: 100%;
-      height: 100%;
-      background: var(--bg-gradient);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 40px 30px;
-      position: relative;
-      transition: background 0.6s ease;
-    }
-
-    /* Background Ambient Lights */
-    .glow-orb {
-      position: absolute;
-      width: 250px;
-      height: 250px;
-      background: var(--primary-glow);
-      border-radius: 50%;
-      filter: blur(90px);
-      opacity: 0.35;
-      top: -50px;
-      right: -50px;
-      transition: all 0.6s ease;
-    }
-
-    .glow-orb-2 {
-      position: absolute;
-      width: 200px;
-      height: 200px;
-      background: var(--primary-glow);
+    /* Ambient Animated Background Grid */
+    .bg-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: 0;
+      transition: background 0.6s ease-in-out;
       border-radius: 50%;
       filter: blur(80px);
-      opacity: 0.2;
-      bottom: -40px;
-      left: -40px;
-      transition: all 0.6s ease;
+      transition: all 0.6s ease-in-out;
+
+    .orb-1 {
+      width: 220px;
+      height: 220px;
+      background: var(--primary-glow);
+      top: -40px;
+      right: -40px;
+      opacity: 0.4;
     }
 
-    /* Wallpaper Text / Graphics */
-    .top-badge {
+    .orb-2 {
+      width: 180px;
+      height: 180px;
+      background: var(--secondary-glow);
+      bottom: -30px;
+      left: -30px;
+      opacity: 0.35;
+    }
+
+    /* Content Layout */
+    .wp-top {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 10px;
-      font-size: 0.8rem;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      opacity: 0.7;
-    }
-
-    .big-number {
-      font-size: 7rem;
-      font-weight: 900;
-      line-height: 1;
-      background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.1) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      user-select: none;
-      margin: 10px 0;
-    }
-
-    .quote-box {
       z-index: 2;
     }
 
-    .attitude-quote {
-      font-size: 1.8rem;
-      font-weight: 800;
-      line-height: 1.25;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 12px;
-      text-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    .tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding-top: 15px;
+      width: 8px;
+      height: 8px;
+      background: var(--primary-glow);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--primary-glow);
     }
 
-    .sub-text {
-      font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.6);
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-    }
-
-    .footer-tag {
-      font-size: 0.75rem;
+    .edition {
+      font-size: 0.65rem;
       letter-spacing: 2px;
       opacity: 0.4;
-      text-align: right;
+    }
+
+    /* Download Action Button */
+    .download-btn {
+      margin-top: 10px;
+      padding: 12px 28px;
+      border-radius: 30px;
+      border: none;
+      background: #ffffff;
+      color: #000000;
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 10px 25px rgba(255, 255, 255, 0.15);
+      transition: all 0.3s ease;
+    }
+
+    .download-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px var(--accent-glow);
+      background: var(--primary-glow);
+      color: #ffffff;
+    }
+
+    .download-btn:active {
+      transform: scale(0.96);
     }
   </style>
 </head>
 <body>
 
-  <!-- Controls -->
-  <div class="controls-container">
-    <h2>Select Attitude Level</h2>
-    <div class="number-selector">
-      <button class="num-btn active" onclick="setWallpaper(1)">01</button>
-      <button class="num-btn" onclick="setWallpaper(2)">02</button>
-      <button class="num-btn" onclick="setWallpaper(3)">03</button>
-      <button class="num-btn" onclick="setWallpaper(4)">04</button>
-      <button class="num-btn" onclick="setWallpaper(5)">05</button>
-    </div>
-  </div>
+  <div class="bg-grid"></div>
 
-  <!-- Wallpaper Frame -->
-  <div class="wallpaper-frame" id="frame">
-    <div class="wallpaper-content" id="wallpaper">
-      <div class="glow-orb" id="orb1"></div>
-      <div class="glow-orb-2" id="orb2"></div>
-
-      <div class="top-badge">
-        <span>//</span>
-        <span id="category">RULES OF GAME</span>
-      </div>
-
-      <div class="quote-box">
-        <div class="big-number" id="numDisplay">01</div>
-        <div class="attitude-quote" id="quote">SILENCE IS THE LOUDEST VOICE.</div>
-        <div class="sub-text" id="subtext">LET SUCCESS MAKE THE NOISE</div>
-      </div>
-
-      <div class="footer-tag">
-        ATTITUDE // 2026 EDITION
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>SELECT ATTITUDE LEVEL</h1>
+      <div class="selector-bar">
+        <button class="num-btn active" onclick="changeWallpaper(1)">01</button>
+        <button class="num-btn" onclick="changeWallpaper(2)">02</button>
+        <button class="num-btn" onclick="changeWallpaper(3)">03</button>
+        <button class="num-btn" onclick="changeWallpaper(4)">04</button>
+        <button class="num-btn" onclick="changeWallpaper(5)">05</button>
       </div>
     </div>
+
+    <!-- Wallpaper Frame -->
+    <div class="wallpaper-card" id="wallpaperCard">
+      <div class="wallpaper-inner" id="wallpaperInner">
+        <div class="orb orb-1" id="orb1"></div>
+        <div class="orb orb-2" id="orb2"></div>
+
+        <div class="wp-top">
+          <span class="tag" id="tagText">MODE // 01</span>
+          <span class="brand">ATTITUDE OS</span>
+        </div>
+
+        <div class="wp-middle">
+          <div class="watermark-num" id="numText">01</div>
+          <div class="quote-title" id="quoteTitle">SILENCE IS THE LOUDEST VOICE.</div>
+          <div class="quote-sub" id="quoteSub">LET YOUR SUCCESS MAKE ALL THE NOISE.</div>
+        </div>
+
+        <div class="wp-bottom">
+          <div class="status-dot"></div>
+          <div class="edition">PROD // 2026 EDITION</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Download Button -->
+    <button class="download-btn" onclick="downloadWallpaper()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      Download Wallpaper
+    </button>
   </div>
 
   <script>
     const themes = {
       1: {
-        glow: "#ff0055",
+        primary: "#ff0055",
+        secondary: "#7900ff",
         accentGlow: "rgba(255, 0, 85, 0.4)",
-        gradient: "linear-gradient(135deg, #0f0c20 0%, #150a21 50%, #060208 100%)",
-        category: "RULE #01",
-        number: "01",
-        quote: "SILENCE IS THE LOUDEST VOICE.",
-        subtext: "LET SUCCESS MAKE THE NOISE."
+        bg: "radial-gradient(circle at top right, #240018, #0a000e, #030005)",
+        tag: "RULE // 01",
+        num: "01",
+        title: "SILENCE IS THE LOUDEST VOICE.",
+        sub: "LET YOUR SUCCESS MAKE ALL THE NOISE."
       },
       2: {
-        glow: "#00f0ff",
+        primary: "#00f0ff",
+        secondary: "#0044ff",
         accentGlow: "rgba(0, 240, 255, 0.4)",
-        gradient: "linear-gradient(135deg, #031322 0%, #022030 50%, #010810 100%)",
-        category: "MINDSET",
-        number: "02",
-        quote: "I DON'T COMPETE, I OVERTAKE.",
-        subtext: "BUILT DIFFERENT FROM DAY ONE."
+        bg: "radial-gradient(circle at top right, #002233, #000c18, #010408)",
+        tag: "MINDSET // 02",
+        num: "02",
+        title: "I DON'T COMPETE, I OVERTAKE.",
+        sub: "BUILT DIFFERENT FROM DAY ONE."
       },
       3: {
-        glow: "#ffb700",
+        primary: "#ffb700",
+        secondary: "#ff4800",
         accentGlow: "rgba(255, 183, 0, 0.4)",
-        gradient: "linear-gradient(135deg, #1c1503 0%, #291e02 50%, #0a0701 100%)",
-        category: "KING MODE",
-        number: "03",
-        quote: "NOT EVERYONE DESERVES ACCESS.",
-        subtext: "PRIVILEGE, NOT AN OPTION."
+        bg: "radial-gradient(circle at top right, #2b1d00, #120a00, #050200)",
+        tag: "KING MODE // 03",
+        num: "03",
+        title: "NOT EVERYONE DESERVES ACCESS.",
+        sub: "PRIVILEGE BY DEFAULT, NOT AN OPTION."
       },
       4: {
-        glow: "#a000ff",
+        primary: "#a000ff",
+        secondary: "#e100ff",
         accentGlow: "rgba(160, 0, 255, 0.4)",
-        gradient: "linear-gradient(135deg, #120322 0%, #1b0233 50%, #07000d 100%)",
-        category: "FOCUS",
-        number: "04",
-        quote: "WORK IN DARKNESS, SHINE IN LIGHT.",
-        subtext: "RESULTS WILL SPEAK FOR YOU."
+        bg: "radial-gradient(circle at top right, #1a0033, #0a0018, #030008)",
+        tag: "FOCUS // 04",
+        num: "04",
+        title: "WORK IN DARKNESS, SHINE IN LIGHT.",
+        sub: "EXECUTING GOALS WHILE THEY SLEEP."
       },
       5: {
-        glow: "#00ff66",
+        primary: "#00ff66",
+        secondary: "#0099ff",
         accentGlow: "rgba(0, 255, 102, 0.4)",
-        gradient: "linear-gradient(135deg, #021a0d 0%, #022813 50%, #000a04 100%)",
-        category: "UNSTOPPABLE",
-        number: "05",
-        quote: "PROVE THEM WRONG EVERY SINGLE DAY.",
-        subtext: "NO EXCUSES, JUST EXECUTION."
+        bg: "radial-gradient(circle at top right, #002b11, #001207, #000502)",
+        tag: "UNSTOPPABLE // 05",
+        num: "05",
+        title: "PROVE THEM WRONG EVERY SINGLE DAY.",
+        sub: "ZERO EXCUSES. ONLY RESULTS."
       }
     };
 
-    function setWallpaper(num) {
-      const data = themes[num];
+    function changeWallpaper(level) {
+      const data = themes[level];
       const root = document.documentElement;
 
-      // Update active button
+      // Update button active state
       document.querySelectorAll('.num-btn').forEach((btn, idx) => {
-        btn.classList.toggle('active', idx + 1 === num);
+        btn.classList.toggle('active', idx + 1 === level);
       });
 
-      // Update CSS Variables for Smooth Glow Effects
-      root.style.setProperty('--primary-glow', data.glow);
+      // Update CSS Variables
+      root.style.setProperty('--primary-glow', data.primary);
+      root.style.setProperty('--secondary-glow', data.secondary);
       root.style.setProperty('--accent-glow', data.accentGlow);
+      root.style.setProperty('--bg-gradient', data.bg);
 
-      // Update Content
-      document.getElementById('wallpaper').style.background = data.gradient;
-      document.getElementById('category').innerText = data.category;
-      document.getElementById('numDisplay').innerText = data.number;
-      document.getElementById('quote').innerText = data.quote;
-      document.getElementById('subtext').innerText = data.subtext;
+      // Update Text Elements
+      document.getElementById('tagText').innerText = data.tag;
+      document.getElementById('numText').innerText = data.num;
+      document.getElementById('quoteTitle').innerText = data.title;
+      document.getElementById('quoteSub').innerText = data.sub;
+    }
+
+    // Function to download wallpaper as PNG
+    function downloadWallpaper() {
+      const card = document.getElementById('wallpaperCard');
+      
+      html2canvas(card, {
+        scale: 3, // High resolution output
+        useCORS: true,
+        backgroundColor: null
+      }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `Attitude_Wallpaper_${document.getElementById('numText').innerText}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      });
     }
   </script>
 </body>
-</html>
+</html>    }
+
+    .status-dot {
+      letter-spacing: 2px;
+      z-index: 2;
+      display: flex;
+      align-items: flex-end;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      justify-content: space-between;
+      color: rgba(255, 255, 255, 0.65);
+      line-height: 1.4;
+    }
+
+    .wp-bottom {
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(8px);
+    }
+
+      font-size: 0.8rem;
+      font-weight: 500;
+    .brand {
+      font-size: 0.65rem;
+    .quote-sub {
+      letter-spacing: 2px;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+    }
+
+      opacity: 0.5;
+      margin-bottom: 10px;
+    }
+
+    .wp-middle {
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 900;
+      line-height: 1.2;
+
+    .quote-title {
+      font-size: 1.65rem;
+      z-index: 2;
+    }
+      margin-top: auto;
+      margin-bottom: 10px;
+      margin-bottom: auto;
+    }
+
+    .watermark-num {
+      font-size: 6.5rem;
+      font-weight: 900;
+      line-height: 0.9;
+      letter-spacing: -2px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.02) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+      pointer-events: none;
+    /* Glow Orbs */
+    .orb {
+      position: absolute;
+    }
+
+      pointer-events: none;
+    }
+
+      justify-content: space-between;
+      position: relative;
+    /* App Container */
+    .container {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      display: flex;
+      flex-direction: column;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      max-width: 500px;
+      width: 100%;
+    }
+
+    /* Header Controls */
+    .wallpaper-inner {
+      width: 100%;
+      padding: 35px 25px;
+      height: 100%;
+      background: var(--bg-gradient);
+    .header {
+      text-align: center;
+    }
+
+
+    .header h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #fff, #888);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+    }
+
+    .selector-bar {
+      display: flex;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 8px 12px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9), 0 0 40px var(--accent-glow);
+      transition: box-shadow 0.5s ease;
+    }
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+    }
+      border: 1px solid rgba(255, 255, 255, 0.15);
+
+    .num-btn {
+      border-radius: 24px;
+      overflow: hidden;
+      width: 44px;
+      height: 44px;
+      height: 568px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: transparent;
+      width: 320px;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 1.1rem;
+      position: relative;
+      font-weight: 700;
+    /* Mobile Canvas Frame (9:16 Ratio) */
+    .wallpaper-card {
+      cursor: pointer;
+
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    }
+
+    .num-btn:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.4);
+      transform: translateY(-2px);
+    }
+
+      transform: scale(1.1);
+      border-color: var(--primary-glow);
+      box-shadow: 0 0 20px var(--accent-glow);
+    .num-btn.active {
+      color: #fff;
